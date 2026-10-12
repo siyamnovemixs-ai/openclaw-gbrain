@@ -21,10 +21,8 @@ require_env() {
   fi
 }
 
-require_env OPENAI_API_KEY
-require_env ANTHROPIC_API_KEY
-require_env ALPHACLAW_ROOT_DIR
-require_env GBRAIN_HOME
+# OpenAI এবং Anthropic এর বদলে NVIDIA কী চেক করুন
+require_env NVIDIA_API_KEY
 
 mkdir -p "$ALPHACLAW_ROOT_DIR"
 mkdir -p "$ALPHACLAW_ROOT_DIR/skills"
