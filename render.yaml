@@ -17,7 +17,7 @@ services:
     # ⛔ No disk block — free tier services cannot attach persistent disks.
     #    State directories point to /tmp (ephemeral) instead.
     envVars:
-      # --- AlphaClaw / OpenClaw ---
+      # --- AlphaClaw / OpenClaw core config ---
       - key: ALPHACLAW_ROOT_DIR
         value: /tmp
       - key: OPENCLAW_STATE_DIR
@@ -30,13 +30,14 @@ services:
         generateValue: true
       - key: PORT
         value: "10000"
-      # --- GBrain API keys (required at deploy time) ---
-      # OpenAI: embeddings (text-embedding-3-large)
-      # Anthropic: multi-query expansion + LLM chunking (Haiku)
-      - key: OPENAI_API_KEY
+
+      # --- NVIDIA NIM configuration (replaces OpenAI/Anthropic) ---
+      # NVIDIA_API_KEY: Get your key from build.nvidia.com
+      # OpenClaw auto-detects NVIDIA provider when this key is set.
+      # Base URL: https://integrate.api.nvidia.com/v1 (OpenAI-compatible)
+      - key: NVIDIA_API_KEY
         sync: false
-      - key: ANTHROPIC_API_KEY
-        sync: false
+
       # --- GBrain runtime config ---
       # GBRAIN_HOME is treated as a PARENT directory by gbrain — it
       # appends '.gbrain' itself. Setting GBRAIN_HOME=/tmp yields
