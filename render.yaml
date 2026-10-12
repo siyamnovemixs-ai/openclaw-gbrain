@@ -19,7 +19,6 @@ services:
     disk:
       name: alphaclaw-data
       mountPath: /data
-      sizeGB: 1
     envVars:
       # --- AlphaClaw / OpenClaw ---
       - key: ALPHACLAW_ROOT_DIR
