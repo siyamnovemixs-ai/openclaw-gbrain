@@ -8,28 +8,28 @@ services:
   - type: web
     name: openclaw-gbrain
     runtime: docker
-    # Pro (4 GB) gives ~50% headroom over OpenClaw's 2 GB minimum and
-    # survives bulk-ingest spikes. Drop to standard for a try-it-out
-    # deploy with no real brain yet; bump to pro_plus if you're ingesting
-    # 10k+ pages in one batch.
+    # Free plan: no persistent disk, state resets on each deploy.
+    # Upgrade to Starter (1GB+ disk) for persistent storage.
     plan: free
     region: oregon
     healthCheckPath: /health
     dockerfilePath: ./Dockerfile
-    disk:
-      name: alphaclaw-data
-      mountPath: /data
+    # ⛔ No disk block — free tier services cannot attach persistent disks.
+    #    State directories point to /tmp (ephemeral) instead.
     envVars:
       # --- AlphaClaw / OpenClaw ---
       - key: ALPHACLAW_ROOT_DIR
-        value: /data
+        value: /tmp
+      - key: OPENCLAW_STATE_DIR
+        value: /tmp/.openclaw
+      - key: OPENCLAW_WORKSPACE_DIR
+        value: /tmp/workspace
       - key: SETUP_PASSWORD
         generateValue: true
       - key: OPENCLAW_GATEWAY_TOKEN
         generateValue: true
       - key: PORT
         value: "10000"
-
       # --- GBrain API keys (required at deploy time) ---
       # OpenAI: embeddings (text-embedding-3-large)
       # Anthropic: multi-query expansion + LLM chunking (Haiku)
@@ -37,12 +37,11 @@ services:
         sync: false
       - key: ANTHROPIC_API_KEY
         sync: false
-
       # --- GBrain runtime config ---
       # GBRAIN_HOME is treated as a PARENT directory by gbrain — it
-      # appends '.gbrain' itself. Setting GBRAIN_HOME=/data yields
-      # configDir = /data/.gbrain (brain file at
-      # /data/.gbrain/brain.pglite, config at /data/.gbrain/config.json).
-      # Both persist across deploys via the disk.
+      # appends '.gbrain' itself. Setting GBRAIN_HOME=/tmp yields
+      # configDir = /tmp/.gbrain (brain file at
+      # /tmp/.gbrain/brain.pglite, config at /tmp/.gbrain/config.json).
+      # NOTE: This is ephemeral on the free tier — data resets on redeploy.
       - key: GBRAIN_HOME
-        value: /data
+        value: /tmp
