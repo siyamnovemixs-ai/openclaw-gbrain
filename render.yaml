@@ -1,21 +1,14 @@
 # Render Blueprint: OpenClaw + AlphaClaw + GBrain (PGLite engine)
-# Single-container deploy: AlphaClaw + OpenClaw + GBrain, with the GBrain
-# knowledge brain stored as an embedded PGLite database on the persistent
-# disk. No external Postgres required — PGLite runs in-process and ships
-# pgvector + pg_trgm as bundled extensions.
+# Single-container deploy: AlphaClaw + OpenClaw + GBrain.
 
 services:
   - type: web
     name: openclaw-gbrain
     runtime: docker
-    # Free plan: no persistent disk, state resets on each deploy.
-    # Upgrade to Starter (1GB+ disk) for persistent storage.
     plan: free
     region: oregon
     healthCheckPath: /health
     dockerfilePath: ./Dockerfile
-    # ⛔ No disk block — free tier services cannot attach persistent disks.
-    #    State directories point to /tmp (ephemeral) instead.
     envVars:
       # --- AlphaClaw / OpenClaw core config ---
       - key: ALPHACLAW_ROOT_DIR
@@ -31,18 +24,14 @@ services:
       - key: PORT
         value: "10000"
 
-      # --- NVIDIA NIM configuration (replaces OpenAI/Anthropic) ---
-      # NVIDIA_API_KEY: Get your key from build.nvidia.com
-      # OpenClaw auto-detects NVIDIA provider when this key is set.
-      # Base URL: https://integrate.api.nvidia.com/v1 (OpenAI-compatible)
+      # --- NVIDIA NIM configuration (replaces OpenAI) ---
       - key: NVIDIA_API_KEY
         sync: false
+      - key: OPENCLAW_LLM_BASE_URL
+        value: https://integrate.api.nvidia.com/v1
+      - key: OPENCLAW_LLM_MODEL
+        value: openai/gpt-oss-20b
 
       # --- GBrain runtime config ---
-      # GBRAIN_HOME is treated as a PARENT directory by gbrain — it
-      # appends '.gbrain' itself. Setting GBRAIN_HOME=/tmp yields
-      # configDir = /tmp/.gbrain (brain file at
-      # /tmp/.gbrain/brain.pglite, config at /tmp/.gbrain/config.json).
-      # NOTE: This is ephemeral on the free tier — data resets on redeploy.
       - key: GBRAIN_HOME
         value: /tmp
